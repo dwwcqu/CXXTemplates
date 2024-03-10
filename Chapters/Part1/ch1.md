@@ -385,3 +385,190 @@ std::common_type_t<T1, T2> // C++14 起的等效写法
 
 ## 1.4. 默认模板参数
 
+您还可以为模板参数定义默认值。这些值称为**默认模板参数**[^9]，可以与任何类型的模板一起使用。它们甚至可以引用先前的模板参数。例如，如果您想结合使用定义返回类型的方法和具有多个参数类型的能力（如前面的部分所讨论），可以引入一个模板参数 `RT` 用作返回类型，其默认值为两个参数的通用类型。同样，我们有多个选项：
+1. 我们可以直接使用 `operator?:`。但是，由于我们必须在声明调用参数 a 和 b 之前应用 `operator?:`，我们只能使用它们的类型：
+```c++
+#include <type_traits>
+
+template<typename T1, typename T2,
+        typename RT = std::decay_t<decltype<true ? T1() : T2()>>>
+RT max(T1 a, T2 b)
+{
+    return b < a ? a : b;
+}
+```
+再次注意使用 `std::decay_t<>` 以确保不会返回引用[^10]。
+
+[^9]: 在C++11之前，由于在函数模板的开发中存在历史性的错误，只允许在类模板中使用默认的模板参数。
+
+[^10]: 同样地，在 C++11 中，您必须使用`typename std::decay<...>::type`而不是`std::decay_t<...>`。
+
+请注意，这个实现要求我们能够调用传递类型的**默认构造函数**。还有另一种解决方案，使用`std::declval`，然而，这会使声明变得更加复杂。有关示例，请参见第[11.2.3](../Part1/ch11.md#1123)节。
+
+2. 我们可以使用 `std::common_type<>` 来指定返回类型的默认值：
+```c++
+#include <type_traits>
+
+template<typename T1, typename T2,
+        typename RT = std::common_type_t<T1, T2>>
+RT max(T1 a, T2 b)
+{
+    return b < a ? a : b;
+}
+```
+
+作为调用者，在所有情况下，你可以使用默认值作为返回类型：
+```c++
+auto a = ::max(4, 7.2);
+```
+或者，你可以在所有其他模板参数类型的后面显示地指定返回类型：
+```cpp
+auto b = ::max<double, int, long double>(7.2, 4);
+```
+然而，我们再次面临的问题是，我们必须指定三种类型l来指定返回类型。我们需要能够将返回类型作为第一个模板参数，同时仍然能够从参数类型中推导出它。原则上，即使后面有没有默认参数的参数，也可以为前导函数模板参数设置默认参数：
+```c++
+template<typename RT = long, typename T1, typename T2>
+RT max(T1 a, T2 b)
+{
+    return b < a ? a : b;
+}
+```
+在这里饿模板定义下，我们可以调用：
+```cpp
+int i;
+long l;
+...
+max(i, l);  // return long: 默认模板返回类型
+max<int>(4, 42); // return int: 显示指定
+```
+然而，这种方法只有在模板参数存在“自然”默认值的情况下才有意义。在这里，我们需要模板参数的默认值依赖于前面的模板参数。原则上，这是可能的，正如我们在第[26.5.1](../Part3/ch26.md#2651)节中讨论的那样，但这种技术依赖于类型特征并使定义变得更加复杂。
+因此，出于所有这些原因，最好且最简单的解决方案是让编译器像在第[1.3.2](#132-推导返回类型)节中提出的那样推导返回类型。
+
+## 1.5. 函数模板重载
+
+像普通函数一样，函数模板可以重载。也就是说，你可以有不同的函数定义，它们使用相同的函数名，以便在函数调用中使用该名称时，C++ 编译器必须决定调用哪个候选函数。即使没有模板，这种决策的规则可能变得相当复杂。在本节中，我们讨论涉及模板时的重载。如果您对不涉及模板的基本重载规则不熟悉，请查看附录C，我们在那里提供了关于**重载解析规则**的相当详细的调查。
+
+以下是一个简短的程序，演示了如何重载函数模板：[Codes/ch01/1_5/1_5_max.cpp](../../Codes/ch01/1_5/1_5_max.cpp)
+```cpp
+// maximum of two int values
+int max(int a, int b)
+{
+    return b < a ? a : b;
+}
+
+// maximum of two values of any type:
+template<typename T>
+T max(T a, T b)
+{
+    return b < a ? a : b;
+}
+
+int main()
+{
+    ::max(7, 42);           // 调用类型为 int 非模板函数
+    ::max(7.0, 42.0);       // 调用 max<double> 模板函数，推导类型
+    ::max('a', 'b');        // 调用 max<char> 模板函数，推导类型
+    ::max<>(7, 42);         // 调用 max<int> 模板函数，推导类型
+    ::max<double>(7, 42);   // 调用 max<double> 模板函数，没有推导 
+    ::max('a', 42.7);       // 调用类型为 int 的非模板函数
+}
+```
+
+正如这个例子所示，一个非模板函数可以与一个具有相同名称并且可以用相同类型实例化的函数模板共存。在其他所有因素相等的情况下，**重载解析过程会优先选择非模板函数而不是从模板生成的函数**。第一次调用就符合这个规则：
+```cpp
+::max(7, 42); // 两个 int 类型值与非模板函数完美匹配
+```
+
+如果模板函数可以生成一个更好的匹配函数的话，那么就会选择模板函数：
+```cpp
+::max(7.0, 42.0);   // 通过参数推导调用 max<double>
+::max('a', 'b');    // 通过参数推导调用 max<char>
+```
+在这里，模板是一个更好的匹配，因为不需要从 `double` 或 `char` 转换为 `int`（请参阅第 C.2 节的重载解析规则）。
+
+也可以明确指定一个空的模板参数列表。这种语法表示只有模板可以解析调用，但所有模板参数都应从调用参数中推导出：
+```cpp
+::max<>(7, 42); // 通过参数推导调用 max<int>
+```
+由于对于推导的模板参数不考虑自动类型转换，但对于普通函数参数考虑，最后的调用使用了非模板函数（显然 `'a'` 和 `42.7` 都被转换为 `int`）：
+```cpp
+::max('a', 42.7);   // 只有非模板函数才允许 nontrivial 类型转换
+```
+
+这里是一种有趣的例子，可以重载模板以能够显式指定返回类型：
+```cpp
+template<typename T1, typename T2>
+auto max(T1 a, T2 b)
+{
+    return b < a ? a : b;
+}
+
+template<typename RT, typename T2, typename T2>
+RT max(T1 a, T2 b)
+{
+    return b < a ? a : b;
+}
+```
+
+例如，我们此时可以调用 `max()` 函数：
+```cpp
+auto a = ::max(4, 7.2);                 // 使用第一个模板函数
+auto b = ::max<long double>(7.2, 4);    // 使用第二个模板函数
+```
+然而，当调用：
+```cpp
+auto c = ::max<int>(4, 7.2);    // ERROR: 两个模板函数都匹配
+```
+这两个模板函数都匹配，这导致了通常会优先选择其中一个，并导致歧义错误的过载解析。因此，**在重载函数模板时，应确保它们中的任何一个都仅匹配任何调用**。
+
+一个有用的例子是为指针和普通 C 字符串重载最大值模板：[Codes/ch01/1_5/1_5_maxval.cpp](../../Codes/ch01/1_5/1_5_maxval.cpp)
+```cpp
+#include <cstring>
+#include <string>
+
+// maximum of two values of any types
+template<typename T>
+T max(T a, T b) 
+{
+    return b < a ? a : b;
+}
+
+// maximum of two pointers
+template<typename T>
+T* max(T* a, T* b)
+{
+    return *b < *a ? a : b;
+}
+
+// maximum of two C-strings:
+char const* max(char const* a, char const* b)
+{
+    return std::strcmp(b, a) < 0 ? a : b;
+}
+
+int main()
+{
+    int a = 7;
+    int b = 42;
+    auto m1 = ::max(a, b);      // max() for two values of int type
+
+    std::string s1 = "hey";
+    std::string s2 = "you";
+    auto m2 = ::max(s1, s2);    // max() for two values of std::string type
+
+    int* p1 = &b;
+    int* p2 = &a;
+    auto m3 = ::max(p1, p2);   // max() for two pointers
+
+    char const* c1 = "hello";
+    char const* c2 = "world";
+    auto m4 = ::max(c1, c2);   // max() for two C-strings
+
+    return 0;
+}
+```
+
+请注意，在 `max()` 的所有重载中，我们通过值传递参数。通常，当重载函数模板时，最好只更改必要的部分。您应该限制更改到参数的数量或显式指定模板参数。否则，可能会发生意外的效果。例如，如果您将 `max()` 模板实现为通过引用传递参数并为通过值传递的两个 C 字符串重载它，您无法使用三参数版本来计算三个 C 字符串的最大值：[Codes/ch01/1_5/1_5_maxref.cpp](../../Codes/ch01/1_5/1_5_maxref.cpp)
+```cpp
+
+```
