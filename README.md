@@ -11,5 +11,7 @@
 + [Part 1](./Chapters/Part1/README.md)
   + [1. 函数模板](./Chapters/Part1/ch1.md)
   + [2. 类模板](./Chapters/Part1/ch2.md)
+  + [3. 非类型模板参数](./Chapters/Part1/ch3.md)
+  + [4. 可变参数模板](./Chapters/Part1/ch4.md)
 + Part 2
 + Part 3
