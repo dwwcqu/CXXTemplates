@@ -18,3 +18,6 @@
   + [7. 通过值还是引用](./Chapters/Part1/ch7.md)
 + Part 2
 + Part 3
++ Appendix
+  + [Appendix A. 唯一定义规则](./Chapters/Appendix/A.md)
+  + [Appendix B. 值类别](./Chapters/Appendix/B.md)
