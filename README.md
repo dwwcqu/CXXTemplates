@@ -16,6 +16,8 @@
   + [5. 模板基础进阶](./Chapters/Part1/ch5.md)
   + [6. 移动语法和 `enable_if<>`](./Chapters/Part1/ch6.md)
   + [7. 通过值还是引用](./Chapters/Part1/ch7.md)
+  + [8. 编译时编程](./Chapters/Part1/ch8.md)
+  + [9. 模板使用实践](./Chapters/Part1/ch9.md)
 + Part 2
 + Part 3
 + Appendix
