@@ -18,6 +18,7 @@
   + [7. 通过值还是引用](./Chapters/Part1/ch7.md)
   + [8. 编译时编程](./Chapters/Part1/ch8.md)
   + [9. 模板使用实践](./Chapters/Part1/ch9.md)
+  + [10. 模板基本术语](./Chapters/Part1/ch10.md)
 + Part 2
 + Part 3
 + Appendix

@@ -165,7 +165,7 @@ class Stack
 
 ## 2.2. 类模板 `Stack` 的使用
 
-要使用类模板的对象，在 **C++17** 之前，您必须始终明确指定**模板参数**[^1]。以下示例显示了如何使用类模板`Stack<>`：[Codes/ch02/2_2/stacktest.cpp](../../Codes/ch02/2_2/stacktest.cpp)
+要使用类模板的对象，在 **C++17** 之前，您必须始终明确指定**模板参数**[1]。以下示例显示了如何使用类模板`Stack<>`：[Codes/ch02/2_2/stacktest.cpp](../../Codes/ch02/2_2/stacktest.cpp)
 ```cpp
 #include "../2_1/stack1.hpp"
 #include <iostream>
@@ -189,7 +189,7 @@ int main()
 }
 ```
 
-[^1]: C++17 引入了类模板参数推导，允许跳过模板参数，如果它们可以从构造函数推导出来。这将在[第2.9节](#29)中讨论。
+
 
 通过声明类型 `Stack<int>`，在类模板内部使用 `int` 作为类型 `T`。因此，`intStack` 被创建为一个对象，它使用 `int` 的向量作为元素，并且**对于调用的所有成员函数，都会实例化该类型的代码**。类似地，通过声明和使用 `Stack<std::string>`，将创建一个使用字符串向量作为元素的对象，并且对于调用的所有成员函数，都会实例化该类型的代码。
 
@@ -297,9 +297,7 @@ class Stack
     }
 };
 ```
-注意，这意味着`class Stack<>`的`operator<<`不是函数模板，而是根据需要实例化的**普通**函数[^2]。
-
-[^2]: 这是一个模板后的实体，详细参考 [12.1](../Part2/ch12.md) 节。
+注意，这意味着`class Stack<>`的`operator<<`不是函数模板，而是根据需要实例化的**普通**函数[2]。
 
 然而，当尝试声明友元函数并在后面定义它时，情况变得更加复杂。实际上，我们有两个选择：
 
@@ -630,20 +628,24 @@ Stack<double, std::deque<double>>
 简单地定义一个现有类型的新名称有两种方法：
 
 1. 使用关键字 `typedef`：
-   ```cpp
-   typedef Stack<int> IntStack; // typedef
-   void foo(IntStack const& s); // s 是 int 栈
-   IntStack istack[10]; // istack 是包含 10 个 int 栈的数组
-   ```
-   我们将这种声明称为 `typedef`[^3]，生成的名称称为 `typedef`-名称。
+   
+```cpp
+typedef Stack<int> IntStack; // typedef
+void foo(IntStack const& s); // s 是 int 栈
+IntStack istack[10]; // istack 是包含 10 个 int 栈的数组
+```
+
+我们将这种声明称为 `typedef`[3]，生成的名称称为 `typedef`-名称。
 
 2. 使用关键字 `using`（自 C++11 起）：
-   ```cpp
-   using IntStack = Stack<int>; // 别名声明
-   void foo(IntStack const& s); // s 是 int 栈
-   IntStack istack[10]; // istack 是包含 10 个 int 栈的数组
-   ```
-   这是由 [DosReisMarcusAliasTemplates] 引入的别名声明(alias declaration)。
+
+```cpp
+using IntStack = Stack<int>; // 别名声明
+void foo(IntStack const& s); // s 是 int 栈
+IntStack istack[10]; // istack 是包含 10 个 int 栈的数组
+```
+
+这是由 DosReisMarcusAliasTemplates 引入的别名声明(alias declaration)。
 
 请注意，在这两种情况下，我们都为**现有类型定义**了一个新名称，而**不是新类型**。因此，在 `typedef` 或 `using` 后：
 ```cpp
@@ -659,11 +661,9 @@ using IntStack = Stack<int>;
 
 由于这种声明更易读（始终在 `=` 的左侧具有已定义的类型名称），在本书的其余部分中，我们更喜欢使用别名声明语法来声明类型别名。
 
-[^3]: 使用关键字 `typedef` 而不是“类型定义”是有意的。关键字 `typedef` 最初的意图是表示“类型定义”。然而，在 C++ 中，“类型定义”实际上指的是其他内容（例如，类或枚举类型的定义）。相反，`typedef` 应该被视为现有类型的替代名称（“别名”），可以通过 `typedef` 实现这一点。
-
 ### 2.8.2. 别名模板
 
-与 `typedef` 不同，别名声明可以被模板化，以便为一组类型提供便捷的名称。自从 C++11 开始，这也是可用的，称为别名模板（alias template）[^4]。
+与 `typedef` 不同，别名声明可以被模板化，以便为一组类型提供便捷的名称。自从 C++11 开始，这也是可用的，称为别名模板（alias template）[4]。
 
 下面的别名模板 `DequeStack`，以元素类型 `T` 作为参数，扩展为使用 `std::deque` 存储其元素的 `Stack`：
 ```cpp
@@ -674,8 +674,6 @@ using DequeStack = Stack<T, std::deque<T>>;
 因此，类模板和别名模板都可以用作参数化类型。但是，**别名模板只是给现有类型一个新名称**，仍然可以使用该类型。`DequeStack<int>` 和 `Stack<int, std::deque<int>>` 表示相同的类型。
 
 再次注意，通常情况下，模板只能在**全局**/**命名空间**范围内或**类声明**内声明和定义。
-
-[^4]: 别名模板有时被错误地称为“typedef模板”，因为它们实现了，如果typedef可以作为模板使用时所能实现的相同作用。
 
 ### 2.8.3. 成员类型的别名模板
 
@@ -701,7 +699,7 @@ using MyTypeIterator = typename MyType<T>::iterator;
 ```cpp
 MyTypeIterator<int> pos;
 ```
-而不是以下这种使用方式：
+而不是以下这种使用方式[5]：
 ```cpp
 typename MyType<T>::iterator pos;
 ```
@@ -765,7 +763,7 @@ Stack intStack = 0; // 自 C++17 起可以推导为 Stack<int>
   ```cpp
   : elems({elem})
   ```
-  没有能够直接接受单个参数作为初始元素的向量构造函数[^6]。
+  没有能够直接接受单个参数作为初始元素的向量构造函数[6]。
 
 请注意，与函数模板不同，类模板参数**不能仅部分推导**（即只能显式指定一些模板参数）。详见第 15.12 节。
 
@@ -794,8 +792,6 @@ public:
     ...
 };
 ```
-
-[^6]: 更糟的是，向量构造函数会接受一个整数参数作为初始大小，因此对于初始值为 `5` 的栈，如果使用 `elems(elem)`，向量将得到五个元素的初始大小。
 
 有了这个，以下初始化可以正常工作：
 ```cpp
@@ -904,3 +900,15 @@ ValueWithComment vc2 = {"hello", "initial value"};
 - 您可以定义聚合类模板；
 - 如果模板类型的调用参数声明为按值调用，则这些参数会衰减；
 - 模板只能在全局/命名空间范围内或类声明内部声明和定义；
+
+[1]: C++17 引入了类模板参数推导，允许跳过模板参数，如果它们可以从构造函数推导出来。这将在[第2.9节](#29)中讨论。
+
+[2]: 这是一个模板后的实体，详细参考 [12.1](../Part2/ch12.md) 节。
+
+[3]: 使用关键字 `typedef` 而不是“类型定义”是有意的。关键字 `typedef` 最初的意图是表示“类型定义”。然而，在 C++ 中，“类型定义”实际上指的是其他内容（例如，类或枚举类型的定义）。相反，`typedef` 应该被视为现有类型的替代名称（“别名”），可以通过 `typedef` 实现这一点。
+
+[4]: 别名模板有时被错误地称为“typedef模板”，因为它们实现了，如果typedef可以作为模板使用时所能实现的相同作用。
+
+[5]: 这里需要使用 `typename`，因为该成员是一个类型。详细信息请参见第 5.1 节。
+
+[6]: 更糟的是，向量构造函数会接受一个整数参数作为初始大小，因此对于初始值为 `5` 的栈，如果使用 `elems(elem)`，向量将得到五个元素的初始大小。
