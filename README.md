@@ -19,7 +19,9 @@
   + [8. 编译时编程](./Chapters/Part1/ch8.md)
   + [9. 模板使用实践](./Chapters/Part1/ch9.md)
   + [10. 模板基本术语](./Chapters/Part1/ch10.md)
+  + [11. 通用库](./Chapters/Part1/ch11.md)
 + Part 2
+  + [12. 深入了解基础知识](./Chapters/Part2/ch12.md)
 + Part 3
 + Appendix
   + [Appendix A. 唯一定义规则](./Chapters/Appendix/A.md)
