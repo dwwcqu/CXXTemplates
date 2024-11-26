@@ -22,6 +22,8 @@
   + [11. 通用库](./Chapters/Part1/ch11.md)
 + Part 2
   + [12. 深入了解基础知识](./Chapters/Part2/ch12.md)
+  + [13. 模板名称](./Chapters/Part2/ch13.md)
+  + [14. 实例化](./Chapters/Part2/ch14.md)
 + Part 3
 + Appendix
   + [Appendix A. 唯一定义规则](./Chapters/Appendix/A.md)
